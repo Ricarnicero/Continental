@@ -6,397 +6,358 @@ import "../styles/global.css";
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width"  />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<meta name="description" content="Jueguemos Continental" />
+		<meta name="author" content="Ricarnciero" />
+		<title>Continental</title>
 
-		<html lang="es">
-			<head>
-				<meta charset="UTF-8" />
-				<meta
-					name="viewport"
-					content="width=device-width, initial-scale=1.0"
-				/>
-				<title>Puntuación de Juego de Cartas</title>
-				<link
-					rel="stylesheet"
-					href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
-				/>
-				<script>
-					// Inicializar jugadores y puntuaciones
-					document.addEventListener("DOMContentLoaded", () => {
-						let players: any[] = [];
+		<script>
+			// Inicializar jugadores y puntuaciones
+			document.addEventListener("DOMContentLoaded", () => {
+				let players: any[] = [];
 
-						let currentRound = 0;
-						const totalRounds = 6;
-						const prevRoundButton = document.getElementById(
-							"prev-round",
-						) as HTMLButtonElement;
-						const nextRoundButton = document.getElementById(
-							"next-round",
-						) as HTMLButtonElement;
-						const resetButton = document.getElementById(
-							"reset-game",
-						) as HTMLButtonElement;
-						const currentRoundElement =
-							document.getElementById("current-round");
-						const roundTitleElement =
-							document.getElementById("round-title");
-						const roundNameElement =
-							document.getElementById("name-round");
+				let currentRound = 0;
+				const totalRounds = 6;
+				const prevRoundButton = document.getElementById(
+					"prev-round",
+				) as HTMLButtonElement;
+				const nextRoundButton = document.getElementById(
+					"next-round",
+				) as HTMLButtonElement;
+				const resetButton = document.getElementById(
+					"reset-game",
+				) as HTMLButtonElement;
+				const currentRoundElement =
+					document.getElementById("current-round");
+				const roundTitleElement =
+					document.getElementById("round-title");
+				const roundNameElement = document.getElementById("name-round");
 
-						const roundsName = [
-							"Dos tercias",
-							"Una tercia y una corrida",
-							"Dos corridas",
-							"Tres tercias",
-							"Dos tercias y una corrida",
-							"Dos corridas y una tercia",
-						];
+				const roundsName = [
+					"Dos tercias",
+					"Una tercia y una corrida",
+					"Dos corridas",
+					"Tres tercias",
+					"Dos tercias y una corrida",
+					"Dos corridas y una tercia",
+				];
 
-						// Guardar en localStorage si existe
-						const savedData = localStorage.getItem("cardGameData");
-						if (savedData) {
-							const data = JSON.parse(savedData);
-							Object.assign(players, data.players);
-							currentRound = data.currentRound;
-						}
+				// Guardar en localStorage si existe
+				const savedData = localStorage.getItem("cardGameData");
+				if (savedData) {
+					const data = JSON.parse(savedData);
+					Object.assign(players, data.players);
+					currentRound = data.currentRound;
+				}
 
-						// Guardar datos en localStorage
-						const saveData = () => {
-							localStorage.setItem(
-								"cardGameData",
-								JSON.stringify({
-									players,
-									currentRound,
-								}),
-							);
+				// Guardar datos en localStorage
+				const saveData = () => {
+					localStorage.setItem(
+						"cardGameData",
+						JSON.stringify({
+							players,
+							currentRound,
+						}),
+					);
+				};
+
+				// Actualizar la vista de jugadores
+				const updatePlayersView = () => {
+					const playersList = document.getElementById("players-list");
+
+					if (playersList) playersList.innerHTML = "";
+					if (players.length === 0 && playersList) {
+						playersList.innerHTML =
+							"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
+						return;
+					}
+
+					players.forEach((player) => {
+						const playerRow = document.createElement("div");
+						playerRow.className =
+							"flex items-center justify-between mb-2 border-b pb-2";
+
+						// Nombre del jugador (editable al hacer click)
+						const nameDiv = document.createElement("div");
+						nameDiv.className = "flex-1 cursor-pointer";
+						nameDiv.textContent = player.name;
+						nameDiv.onclick = () => editPlayerName(player);
+
+						// Contenedor para puntuación
+						const scoreDiv = document.createElement("div");
+						scoreDiv.className = "flex items-center";
+
+						// Input para puntuación
+						const scoreInput = document.createElement("input");
+						scoreInput.type = "number";
+						scoreInput.min = "0";
+						scoreInput.value =
+							player.scores[currentRound].toString();
+						scoreInput.className = "border p-1 w-16 text-center";
+						scoreInput.placeholder = "0";
+						scoreInput.onfocus = (e) => {
+							if (e.target)
+								(e.target as HTMLInputElement).select();
 						};
-
-						// Actualizar la vista de jugadores
-						const updatePlayersView = () => {
-							const playersList =
-								document.getElementById("players-list");
-
-							if (playersList) playersList.innerHTML = "";
-							if (players.length === 0 && playersList) {
-								playersList.innerHTML =
-									"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
-								return;
-							}
-
-							players.forEach((player) => {
-								const playerRow = document.createElement("div");
-								playerRow.className =
-									"flex items-center justify-between mb-2 border-b pb-2";
-
-								// Nombre del jugador (editable al hacer click)
-								const nameDiv = document.createElement("div");
-								nameDiv.className = "flex-1 cursor-pointer";
-								nameDiv.textContent = player.name;
-								nameDiv.onclick = () => editPlayerName(player);
-
-								// Contenedor para puntuación
-								const scoreDiv = document.createElement("div");
-								scoreDiv.className = "flex items-center";
-
-								// Input para puntuación
-								const scoreInput =
-									document.createElement("input");
-								scoreInput.type = "number";
-								scoreInput.min = "0";
-								scoreInput.value =
-									player.scores[currentRound].toString();
-								scoreInput.className =
-									"border p-1 w-16 text-center";
-								scoreInput.placeholder = "0";
-								scoreInput.onfocus = (e) => {
-									if (e.target)
-										(e.target as HTMLInputElement).select();
-								};
-								scoreInput.onchange = (e) => {
-									if (e.target)
-										updateScore(
-											player.id,
-											(e.target as HTMLInputElement).value
-												? (e.target as HTMLInputElement)
-														.value
-												: 0,
-										);
-								};
-
-								// Total
-								const totalSpan =
-									document.createElement("span");
-								totalSpan.className =
-									"ml-2 text-sm text-gray-500";
-								totalSpan.textContent = `Total: ${player.total}`;
-
-								// Añadir elementos
-								scoreDiv.appendChild(scoreInput);
-								scoreDiv.appendChild(totalSpan);
-								playerRow.appendChild(nameDiv);
-								playerRow.appendChild(scoreDiv);
-								if (playersList)
-									playersList.appendChild(playerRow);
-							});
-						};
-
-						// Actualizar el ranking
-						const updateRanking = () => {
-							const rankingList =
-								document.getElementById("ranking-list");
-							if (rankingList) rankingList.innerHTML = "";
-
-							if (players.length === 0 && rankingList) {
-								rankingList.innerHTML =
-									"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
-								return;
-							}
-
-							// Ordenar jugadores por total (ascendente)
-							const sortedPlayers = [...players].sort(
-								(a, b) => a.total - b.total,
-							);
-
-							sortedPlayers.forEach((player, index) => {
-								const rankingRow =
-									document.createElement("div");
-								rankingRow.className = `flex justify-between p-2 ${index === 0 ? "bg-yellow-100 font-bold" : index % 2 === 0 ? "bg-gray-50" : ""}`;
-
-								const positionName =
-									document.createElement("div");
-								positionName.textContent = `${index + 1}. ${player.name}`;
-
-								const score = document.createElement("div");
-								score.textContent = `${player.total} puntos`;
-
-								rankingRow.appendChild(positionName);
-								rankingRow.appendChild(score);
-								if (rankingList)
-									rankingList.appendChild(rankingRow);
-							});
-						};
-
-						// Actualizar número de ronda
-						const updateRoundDisplay = () => {
-							if (currentRoundElement) {
-								currentRoundElement.textContent = `Ronda ${currentRound + 1} de ${totalRounds}`;
-							}
-
-							if (roundNameElement) {
-								roundNameElement.textContent =
-									roundsName[currentRound];
-							}
-
-							if (roundTitleElement) {
-								roundTitleElement.textContent = `Puntuación de la Ronda ${currentRound + 1}`;
-							}
-
-							// Habilitar/deshabilitar botones de navegación
-							if (prevRoundButton)
-								prevRoundButton.disabled = currentRound === 0;
-							if (nextRoundButton)
-								nextRoundButton.disabled =
-									currentRound === totalRounds - 1;
-						};
-
-						// Cambiar de ronda
-						const changeRound = (roundIndex: number) => {
-							if (roundIndex >= 0 && roundIndex < totalRounds) {
-								currentRound = roundIndex;
-								updateRoundDisplay();
-								updatePlayersView();
-								saveData();
-							}
-						};
-
-						// Actualizar puntuación
-						const updateScore = (
-							playerId: number,
-							value: string | number,
-						) => {
-							const player = players.find(
-								(p) => p.id === playerId,
-							);
-							if (player) {
-								const numericValue = Number(value);
-								player.scores[currentRound] = isNaN(
-									numericValue,
-								)
-									? 0
-									: numericValue;
-								player.total = player.scores.reduce(
-									(sum: any, score: any) => sum + score,
-									0,
+						scoreInput.onchange = (e) => {
+							if (e.target)
+								updateScore(
+									player.id,
+									(e.target as HTMLInputElement).value
+										? (e.target as HTMLInputElement).value
+										: 0,
 								);
-								updateRanking();
-								saveData();
-							}
 						};
 
-						// Editar nombre de jugador
-						const editPlayerName = (player: {
-							id: any;
-							name: any;
-							scores?: number[];
-							total?: number;
-						}) => {
-							const newName = prompt(
-								"Ingrese nuevo nombre:",
-								player.name,
-							);
-							if (newName !== null) {
-								player.name =
-									newName.trim() || `Jugador ${player.id}`;
-								updatePlayersView();
-								updateRanking();
-								saveData();
-							}
-						};
+						// Total
+						const totalSpan = document.createElement("span");
+						totalSpan.className = "ml-2 text-sm text-gray-500";
+						totalSpan.textContent = `Total: ${player.total}`;
 
-						// Resetear juego
-						const resetGame = () => {
-							if (
-								confirm(
-									"¿Estás seguro que quieres reiniciar el juego? Se perderán todas las puntuaciones.",
-								)
-							) {
-								players = [];
-								currentRound = 0;
-								updateRoundDisplay();
-								updatePlayersView();
-								updateRanking();
-								saveData();
-							}
-						};
+						// Añadir elementos
+						scoreDiv.appendChild(scoreInput);
+						scoreDiv.appendChild(totalSpan);
+						playerRow.appendChild(nameDiv);
+						playerRow.appendChild(scoreDiv);
+						if (playersList) playersList.appendChild(playerRow);
+					});
+				};
 
-						// Configurar manejadores de eventos
-						if (prevRoundButton)
-							prevRoundButton.onclick = () =>
-								changeRound(currentRound - 1);
-						if (nextRoundButton)
-							nextRoundButton.onclick = () =>
-								changeRound(currentRound + 1);
-						if (resetButton) resetButton.onclick = resetGame;
+				// Actualizar el ranking
+				const updateRanking = () => {
+					const rankingList = document.getElementById("ranking-list");
+					if (rankingList) rankingList.innerHTML = "";
 
-						const addPlayerButton =
-							document.getElementById("add-player");
-						if (addPlayerButton) {
-							addPlayerButton.addEventListener("click", () => {
-								const newPlayerName = document.getElementById(
-									"new-player-name",
-								) as HTMLInputElement;
-								if (newPlayerName) {
-									const newPlayer = {
-										id: players.length + 1,
-										name: newPlayerName.value,
-										scores: [0, 0, 0, 0, 0, 0],
-										total: 0,
-									};
-									players.push(newPlayer);
-									updatePlayersView();
-									updateRanking();
-									saveData();
-									newPlayerName.value = ""; // Limpiar el input
-								}
-							});
-						}
+					if (players.length === 0 && rankingList) {
+						rankingList.innerHTML =
+							"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
+						return;
+					}
 
-						// Inicializar la visualización
+					// Ordenar jugadores por total (ascendente)
+					const sortedPlayers = [...players].sort(
+						(a, b) => a.total - b.total,
+					);
+
+					sortedPlayers.forEach((player, index) => {
+						const rankingRow = document.createElement("div");
+						rankingRow.className = `flex justify-between p-2 ${index === 0 ? "bg-yellow-100 font-bold" : index % 2 === 0 ? "bg-gray-50" : ""}`;
+
+						const positionName = document.createElement("div");
+						positionName.textContent = `${index + 1}. ${player.name}`;
+
+						const score = document.createElement("div");
+						score.textContent = `${player.total} puntos`;
+
+						rankingRow.appendChild(positionName);
+						rankingRow.appendChild(score);
+						if (rankingList) rankingList.appendChild(rankingRow);
+					});
+				};
+
+				// Actualizar número de ronda
+				const updateRoundDisplay = () => {
+					if (currentRoundElement) {
+						currentRoundElement.textContent = `Ronda ${currentRound + 1} de ${totalRounds}`;
+					}
+
+					if (roundNameElement) {
+						roundNameElement.textContent = roundsName[currentRound];
+					}
+
+					if (roundTitleElement) {
+						roundTitleElement.textContent = `Puntuación de la Ronda ${currentRound + 1}`;
+					}
+
+					// Habilitar/deshabilitar botones de navegación
+					if (prevRoundButton)
+						prevRoundButton.disabled = currentRound === 0;
+					if (nextRoundButton)
+						nextRoundButton.disabled =
+							currentRound === totalRounds - 1;
+				};
+
+				// Cambiar de ronda
+				const changeRound = (roundIndex: number) => {
+					if (roundIndex >= 0 && roundIndex < totalRounds) {
+						currentRound = roundIndex;
+						updateRoundDisplay();
+						updatePlayersView();
+						saveData();
+					}
+				};
+
+				// Actualizar puntuación
+				const updateScore = (
+					playerId: number,
+					value: string | number,
+				) => {
+					const player = players.find((p) => p.id === playerId);
+					if (player) {
+						const numericValue = Number(value);
+						player.scores[currentRound] = isNaN(numericValue)
+							? 0
+							: numericValue;
+						player.total = player.scores.reduce(
+							(sum: any, score: any) => sum + score,
+							0,
+						);
+						updateRanking();
+						saveData();
+					}
+				};
+
+				// Editar nombre de jugador
+				const editPlayerName = (player: {
+					id: any;
+					name: any;
+					scores?: number[];
+					total?: number;
+				}) => {
+					const newName = prompt(
+						"Ingrese nuevo nombre:",
+						player.name,
+					);
+					if (newName !== null) {
+						player.name = newName.trim() || `Jugador ${player.id}`;
+						updatePlayersView();
+						updateRanking();
+						saveData();
+					}
+				};
+
+				// Resetear juego
+				const resetGame = () => {
+					if (
+						confirm(
+							"¿Estás seguro que quieres reiniciar el juego? Se perderán todas las puntuaciones.",
+						)
+					) {
+						players = [];
+						currentRound = 0;
 						updateRoundDisplay();
 						updatePlayersView();
 						updateRanking();
+						saveData();
+					}
+				};
+
+				// Configurar manejadores de eventos
+				if (prevRoundButton)
+					prevRoundButton.onclick = () =>
+						changeRound(currentRound - 1);
+				if (nextRoundButton)
+					nextRoundButton.onclick = () =>
+						changeRound(currentRound + 1);
+				if (resetButton) resetButton.onclick = resetGame;
+
+				const addPlayerButton = document.getElementById("add-player");
+				if (addPlayerButton) {
+					addPlayerButton.addEventListener("click", () => {
+						const newPlayerName = document.getElementById(
+							"new-player-name",
+						) as HTMLInputElement;
+						if (newPlayerName) {
+							const newPlayer = {
+								id: players.length + 1,
+								name: newPlayerName.value,
+								scores: [0, 0, 0, 0, 0, 0],
+								total: 0,
+							};
+							players.push(newPlayer);
+							updatePlayersView();
+							updateRanking();
+							saveData();
+							newPlayerName.value = ""; // Limpiar el input
+						}
 					});
-				</script>
-			</head>
-			<body class="bg-gray-100 min-h-screen">
-				<div class="max-w-md mx-auto p-2 flex flex-col h-screen">
-					<!-- Header -->
-					<div class="bg-blue-600 text-white p-3 rounded-t-lg shadow">
-						<h1 class="text-xl font-bold text-center">
-							Puntuación de Juego de Cartas
-						</h1>
-						<p class="text-center text-sm">
-							Puntuación más baja gana
-						</p>
-					</div>
+				}
 
-					<!-- Añadir nuevo jugador -->
-					<div class="bg-white p-2 mb-2 shadow rounded">
-						<h2 class="font-bold mb-2 text-center">
-							Añadir Jugador
-						</h2>
-						<input
-							type="text"
-							id="new-player-name"
-							class="border p-1 w-full mb-2"
-							placeholder="Nombre del jugador"
-							onfocus="this.select()"
-							onkeypress="if(event.key === 'Enter') { document.getElementById('add-player').click(); }"
-						/>
-						<button
-							id="add-player"
-							class="bg-green-500 text-white px-4 py-2 rounded w-full"
-						>
-							Añadir Jugador
-						</button>
-					</div>
-
-					<!-- Round selector -->
-					<div
-						class="bg-white p-2 flex justify-between mb-2 shadow rounded"
-					>
-						<button
-							id="prev-round"
-							class="bg-blue-500 text-white px-3 py-1 rounded"
-						>
-							Anterior
-						</button>
-						<div class="text-center">
-							<div id="current-round">Ronda 1 de 5</div>
-							<div id="name-round" class="font-bold">
-								Dos TERCIAS
-							</div>
-						</div>
-						<button
-							id="next-round"
-							class="bg-blue-500 text-white px-3 py-1 rounded"
-						>
-							Siguiente
-						</button>
-					</div>
-					<!-- Score input -->
-					<div
-						class="bg-white flex-grow mb-3 p-2 shadow rounded overflow-y-auto"
-					>
-						<h2 id="round-title" class="font-bold mb-2 text-center">
-							Puntuación de la Ronda 1
-						</h2>
-						<div id="players-list">
-							<!-- Los jugadores se cargarán dinámicamente con JavaScript -->
-						</div>
-					</div>
-
-					<!-- Ranking -->
-					<div class="bg-white p-2 shadow rounded mb-2">
-						<h2 class="font-bold mb-2 text-center">Ranking</h2>
-						<div id="ranking-list" class="overflow-y-auto max-h-48">
-							<!-- El ranking se cargará dinámicamente con JavaScript -->
-						</div>
-					</div>
-
-					<!-- Reset button -->
-					<div class="text-center mt-2 mb-4">
-						<button
-							id="reset-game"
-							class="bg-red-500 text-white px-4 py-2 rounded"
-						>
-							Reiniciar Juego
-						</button>
-					</div>
-				</div>
-			</body>
-		</html>
+				// Inicializar la visualización
+				updateRoundDisplay();
+				updatePlayersView();
+				updateRanking();
+			});
+		</script>
 	</head>
+	<body class="bg-gray-100 min-h-screen">
+		<div class="max-w-md mx-auto p-2 flex flex-col h-screen">
+			<!-- Header -->
+			<div class="bg-blue-600 text-white p-3 rounded-t-lg shadow">
+				<h1 class="text-xl font-bold text-center">
+					Continental
+				</h1>
+				<p class="text-center text-sm">Puntuación más baja gana</p>
+			</div>
+
+			<!-- Añadir nuevo jugador -->
+			<div class="bg-white p-2 mb-2 shadow rounded">
+				<h2 class="font-bold mb-2 text-center">Añadir Jugador</h2>
+				<input
+					type="text"
+					id="new-player-name"
+					class="border p-1 w-full mb-2"
+					placeholder="Nombre del jugador"
+					onfocus="this.select()"
+					onkeypress="if(event.key === 'Enter') { document.getElementById('add-player').click(); }"
+				/>
+				<button
+					id="add-player"
+					class="bg-green-500 text-white px-4 py-2 rounded w-full"
+				>
+					Añadir Jugador
+				</button>
+			</div>
+
+			<!-- Round selector -->
+			<div class="bg-white p-2 flex justify-between mb-2 shadow rounded">
+				<button
+					id="prev-round"
+					class="bg-blue-500 text-white px-3 py-1 rounded"
+				>
+					Anterior
+				</button>
+				<div class="text-center">
+					<div id="current-round">Ronda 1 de 5</div>
+					<div id="name-round" class="font-bold">Dos TERCIAS</div>
+				</div>
+				<button
+					id="next-round"
+					class="bg-blue-500 text-white px-3 py-1 rounded"
+				>
+					Siguiente
+				</button>
+			</div>
+			<!-- Score input -->
+			<div
+				class="bg-white flex-grow mb-3 p-2 shadow rounded overflow-y-auto"
+			>
+				<h2 id="round-title" class="font-bold mb-2 text-center">
+					Puntuación de la Ronda 1
+				</h2>
+				<div id="players-list">
+					<!-- Los jugadores se cargarán dinámicamente con JavaScript -->
+				</div>
+			</div>
+
+			<!-- Ranking -->
+			<div class="bg-white p-2 shadow rounded mb-2">
+				<h2 class="font-bold mb-2 text-center">Ranking</h2>
+				<div id="ranking-list" class="overflow-y-auto max-h-48">
+					<!-- El ranking se cargará dinámicamente con JavaScript -->
+				</div>
+			</div>
+
+			<!-- Reset button -->
+			<div class="text-center mt-2 mb-4">
+				<button
+					id="reset-game"
+					class="bg-red-500 text-white px-4 py-2 rounded"
+				>
+					Reiniciar Juego
+				</button>
+			</div>
+		</div>
+	</body>
 </html>
