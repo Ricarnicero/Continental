@@ -77,7 +77,13 @@ import "../styles/global.css";
 						const updatePlayersView = () => {
 							const playersList =
 								document.getElementById("players-list");
+
 							if (playersList) playersList.innerHTML = "";
+							if (players.length === 0 && playersList) {
+								playersList.innerHTML =
+									"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
+								return;
+							}
 
 							players.forEach((player) => {
 								const playerRow = document.createElement("div");
@@ -141,6 +147,12 @@ import "../styles/global.css";
 							const rankingList =
 								document.getElementById("ranking-list");
 							if (rankingList) rankingList.innerHTML = "";
+
+							if (players.length === 0 && rankingList) {
+								rankingList.innerHTML =
+									"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
+								return;
+							}
 
 							// Ordenar jugadores por total (ascendente)
 							const sortedPlayers = [...players].sort(
@@ -279,7 +291,7 @@ import "../styles/global.css";
 									const newPlayer = {
 										id: players.length + 1,
 										name: newPlayerName.value,
-										scores: [0, 0, 0, 0, 0,0],
+										scores: [0, 0, 0, 0, 0, 0],
 										total: 0,
 									};
 									players.push(newPlayer);
