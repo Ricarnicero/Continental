@@ -6,16 +6,25 @@ import "../styles/global.css";
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width"  />
-		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content="Jueguemos Continental" />
-		<meta name="author" content="Ricarnciero" />
-		<title>Continental</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
+                <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)" />
+                <meta name="color-scheme" content="light dark" />
+                <link rel="manifest" href="/manifest.webmanifest" />
+                <meta name="generator" content={Astro.generator} />
+                <meta name="description" content="Jueguemos Continental" />
+                <meta name="author" content="Ricarnciero" />
+                <title>Continental</title>
 
 		<script>
-			// Inicializar jugadores y puntuaciones
-			document.addEventListener("DOMContentLoaded", () => {
-				let players: any[] = [];
+                        // Inicializar jugadores y puntuaciones
+                        document.addEventListener("DOMContentLoaded", () => {
+                                let players: any[] = [];
+
+                                // Registrar Service Worker
+                                if ('serviceWorker' in navigator) {
+                                        navigator.serviceWorker.register('/sw.js');
+                                }
 
 				let currentRound = 0;
 				const totalRounds = 6;
@@ -66,63 +75,63 @@ import "../styles/global.css";
 				const updatePlayersView = () => {
 					const playersList = document.getElementById("players-list");
 
-					if (playersList) playersList.innerHTML = "";
-					if (players.length === 0 && playersList) {
-						playersList.innerHTML =
-							"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
-						return;
-					}
+                                        if (playersList) playersList.innerHTML = "";
+                                        if (players.length === 0 && playersList) {
+                                                playersList.innerHTML =
+                                                        "<p class='text-center text-gray-500 dark:text-gray-400'>No hay jugadores añadidos.</p>";
+                                                return;
+                                        }
 
-					players.forEach((player) => {
-						const playerRow = document.createElement("div");
-						playerRow.className =
-							"flex items-center justify-between mb-2 border-b pb-2";
+                                        players.forEach((player) => {
+                                                const playerRow = document.createElement("div");
+                                                playerRow.className =
+                                                        "flex items-center justify-between mb-2 border-b border-gray-300 dark:border-gray-700 pb-2";
 
-						// Nombre del jugador (editable al hacer click)
-						const nameDiv = document.createElement("div");
-						nameDiv.className = "flex-1 cursor-pointer";
-						nameDiv.textContent = player.name;
-						nameDiv.onclick = () => editPlayerName(player);
+                                                // Nombre del jugador (editable al hacer click)
+                                                const nameDiv = document.createElement("div");
+                                                nameDiv.className = "flex-1 cursor-pointer";
+                                                nameDiv.textContent = player.name;
+                                                nameDiv.onclick = () => editPlayerName(player);
 
-						// Contenedor para puntuación
-						const scoreDiv = document.createElement("div");
-						scoreDiv.className = "flex items-center";
+                                                // Contenedor para puntuación
+                                                const scoreDiv = document.createElement("div");
+                                                scoreDiv.className = "flex items-center";
 
-						// Input para puntuación
-						const scoreInput = document.createElement("input");
-						scoreInput.type = "number";
-						scoreInput.min = "0";
-						scoreInput.value =
-							player.scores[currentRound].toString();
-						scoreInput.className = "border p-1 w-16 text-center";
-						scoreInput.placeholder = "0";
-						scoreInput.onfocus = (e) => {
-							if (e.target)
-								(e.target as HTMLInputElement).select();
-						};
-						scoreInput.onchange = (e) => {
-							if (e.target)
-								updateScore(
-									player.id,
-									(e.target as HTMLInputElement).value
-										? (e.target as HTMLInputElement).value
-										: 0,
-								);
-						};
+                                                // Input para puntuación
+                                                const scoreInput = document.createElement("input");
+                                                scoreInput.type = "number";
+                                                scoreInput.min = "0";
+                                                scoreInput.value =
+                                                        player.scores[currentRound].toString();
+                                                scoreInput.className = "border p-1 w-16 text-center bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100";
+                                                scoreInput.placeholder = "0";
+                                                scoreInput.onfocus = (e) => {
+                                                        if (e.target)
+                                                                (e.target as HTMLInputElement).select();
+                                                };
+                                                scoreInput.onchange = (e) => {
+                                                        if (e.target)
+                                                                updateScore(
+                                                                        player.id,
+                                                                        (e.target as HTMLInputElement).value
+                                                                                ? (e.target as HTMLInputElement).value
+                                                                                : 0,
+                                                                );
+                                                };
 
-						// Total
-						const totalSpan = document.createElement("span");
-						totalSpan.className = "ml-2 text-sm text-gray-500";
-						totalSpan.textContent = `Total: ${player.total}`;
+                                                // Total
+                                                const totalSpan = document.createElement("span");
+                                                totalSpan.className = "ml-2 text-sm text-gray-500 dark:text-gray-400";
+                                                totalSpan.textContent = `Total: ${player.total}`;
 
-						// Añadir elementos
-						scoreDiv.appendChild(scoreInput);
-						scoreDiv.appendChild(totalSpan);
-						playerRow.appendChild(nameDiv);
-						playerRow.appendChild(scoreDiv);
-						if (playersList) playersList.appendChild(playerRow);
-					});
-				};
+                                                // Añadir elementos
+                                                scoreDiv.appendChild(scoreInput);
+                                                scoreDiv.appendChild(totalSpan);
+                                                playerRow.appendChild(nameDiv);
+                                                playerRow.appendChild(scoreDiv);
+                                                if (playersList) playersList.appendChild(playerRow);
+                                        });
+                                };
 
 				// Actualizar el ranking
 				const updateRanking = () => {
@@ -130,8 +139,8 @@ import "../styles/global.css";
 					if (rankingList) rankingList.innerHTML = "";
 
 					if (players.length === 0 && rankingList) {
-						rankingList.innerHTML =
-							"<p class='text-center text-gray-500'>No hay jugadores añadidos.</p>";
+                                        rankingList.innerHTML =
+                                                "<p class='text-center text-gray-500 dark:text-gray-400'>No hay jugadores añadidos.</p>";
 						return;
 					}
 
@@ -142,7 +151,7 @@ import "../styles/global.css";
 
 					sortedPlayers.forEach((player, index) => {
 						const rankingRow = document.createElement("div");
-						rankingRow.className = `flex justify-between p-2 ${index === 0 ? "bg-yellow-100 font-bold" : index % 2 === 0 ? "bg-gray-50" : ""}`;
+                                                rankingRow.className = `flex justify-between p-2 ${index === 0 ? "bg-yellow-100 dark:bg-yellow-700 font-bold" : index % 2 === 0 ? "bg-gray-50 dark:bg-gray-700" : "dark:bg-gray-800"}`;
 
 						const positionName = document.createElement("div");
 						positionName.textContent = `${index + 1}. ${player.name}`;
@@ -281,10 +290,10 @@ import "../styles/global.css";
 			});
 		</script>
 	</head>
-	<body class="bg-gray-100 min-h-screen">
-		<div class="max-w-md mx-auto p-2 flex flex-col h-screen">
+        <body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
+                <div class="w-full max-w-md mx-auto p-2 flex flex-col h-screen">
 			<!-- Header -->
-			<div class="bg-blue-600 text-white p-3 rounded-t-lg shadow">
+                        <div class="bg-blue-600 dark:bg-blue-700 text-white p-3 rounded-t-lg shadow">
 				<h1 class="text-xl font-bold text-center">
 					Continental
 				</h1>
@@ -292,13 +301,13 @@ import "../styles/global.css";
 			</div>
 
 			<!-- Añadir nuevo jugador -->
-			<div class="bg-white p-2 mb-2 shadow rounded">
+                        <div class="bg-white dark:bg-gray-800 p-2 mb-2 shadow rounded">
 				<h2 class="font-bold mb-2 text-center">Añadir Jugador</h2>
 				<input
-					type="text"
-					id="new-player-name"
-					class="border p-1 w-full mb-2"
-					placeholder="Nombre del jugador"
+                                        type="text"
+                                        id="new-player-name"
+                                        class="border p-1 w-full mb-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                                        placeholder="Nombre del jugador"
 					onfocus="this.select()"
 					onkeypress="if(event.key === 'Enter') { document.getElementById('add-player').click(); }"
 				/>
@@ -311,10 +320,10 @@ import "../styles/global.css";
 			</div>
 
 			<!-- Round selector -->
-			<div class="bg-white p-2 flex justify-between mb-2 shadow rounded">
+                                <div class="bg-white dark:bg-gray-800 p-2 flex justify-between mb-2 shadow rounded">
 				<button
-					id="prev-round"
-					class="bg-blue-500 text-white px-3 py-1 rounded"
+                                        id="prev-round"
+                                        class="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded"
 				>
 					Anterior
 				</button>
@@ -323,16 +332,16 @@ import "../styles/global.css";
 					<div id="name-round" class="font-bold">Dos TERCIAS</div>
 				</div>
 				<button
-					id="next-round"
-					class="bg-blue-500 text-white px-3 py-1 rounded"
+                                        id="next-round"
+                                        class="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded"
 				>
 					Siguiente
 				</button>
 			</div>
 			<!-- Score input -->
-			<div
-				class="bg-white flex-grow mb-3 p-2 shadow rounded overflow-y-auto"
-			>
+                        <div
+                                class="bg-white dark:bg-gray-800 flex-grow mb-3 p-2 shadow rounded overflow-y-auto"
+                        >
 				<h2 id="round-title" class="font-bold mb-2 text-center">
 					Puntuación de la Ronda 1
 				</h2>
@@ -342,7 +351,7 @@ import "../styles/global.css";
 			</div>
 
 			<!-- Ranking -->
-			<div class="bg-white p-2 shadow rounded mb-2">
+                        <div class="bg-white dark:bg-gray-800 p-2 shadow rounded mb-2">
 				<h2 class="font-bold mb-2 text-center">Ranking</h2>
 				<div id="ranking-list" class="overflow-y-auto max-h-48">
 					<!-- El ranking se cargará dinámicamente con JavaScript -->
@@ -351,10 +360,10 @@ import "../styles/global.css";
 
 			<!-- Reset button -->
 			<div class="text-center mt-2 mb-4">
-				<button
-					id="reset-game"
-					class="bg-red-500 text-white px-4 py-2 rounded"
-				>
+                                <button
+                                        id="reset-game"
+                                        class="bg-red-500 dark:bg-red-600 text-white px-4 py-2 rounded"
+                                >
 					Reiniciar Juego
 				</button>
 			</div>
